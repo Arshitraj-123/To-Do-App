@@ -1,0 +1,2402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow Dashboard</title>
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+       * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg-primary);
+    min-height: 100vh;
+    color: var(--text-primary);
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.content-wrapper {
+    display: flex;
+    flex: 1;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 260px;
+    background: var(--bg-sidebar);
+    color: var(--text-primary);
+    padding: 0;
+    position: fixed;
+    height: 100vh;
+    box-shadow: 4px 0 12px var(--shadow);
+    transition: background 0.3s ease, color 0.3s ease;
+    z-index: 100;
+}
+
+.sidebar-header {
+    padding: 30px 25px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.logo-icon {
+    font-size: 1.8rem;
+}
+
+.nav-menu {
+    padding: 20px 0;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 25px;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-size: 1rem;
+}
+
+.nav-item:hover {
+    background: rgba(0, 0, 0, 0.05);
+    transform: translateX(5px);
+}
+
+.nav-item.active {
+    background: rgba(0, 0, 0, 0.1);
+    border-right: 4px solid #3498db;
+}
+
+.nav-icon {
+    font-size: 1.2rem;
+    width: 20px;
+}
+
+.theme-toggle {
+    margin-top: auto;
+    padding: 20px 25px;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    margin-left: 260px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.header {
+    background: var(--bg-secondary);
+    padding: 25px 40px;
+    box-shadow: 0 2px 10px var(--shadow);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.3s ease;
+    position: relative;
+}
+
+.header-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.header-subtitle {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+}
+
+/* User Avatar and Profile Dropdown */
+.user-profile {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 3px solid transparent;
+    position: relative;
+}
+
+.user-avatar:hover {
+    transform: scale(1.05);
+    border-color: var(--border-color);
+    box-shadow: 0 4px 12px var(--shadow);
+}
+
+.user-avatar::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 14px;
+    height: 14px;
+    background: #27ae60;
+    border: 2px solid var(--bg-secondary);
+    border-radius: 50%;
+}
+
+.profile-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 10px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 8px 25px var(--shadow);
+    border: 1px solid var(--border-color);
+    min-width: 200px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.profile-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.profile-dropdown::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    right: 15px;
+    width: 16px;
+    height: 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-bottom: none;
+    border-right: none;
+    transform: rotate(45deg);
+}
+
+.profile-dropdown-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.profile-dropdown-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0 auto 10px;
+}
+
+.profile-dropdown-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+}
+
+.profile-dropdown-email {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.profile-dropdown-menu {
+    padding: 10px 0;
+}
+
+.profile-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-size: 0.95rem;
+}
+
+.profile-dropdown-item:hover {
+    background: var(--bg-secondary);
+    color: #667eea;
+}
+
+.profile-dropdown-item i {
+    width: 16px;
+    text-align: center;
+}
+
+/* Theme Variables */
+:root {
+    --bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --bg-secondary: #ffffff;
+    --bg-sidebar: #ffffff;
+    --bg-footer: #ffffff;
+    --text-primary: #2c3e50;
+    --text-secondary: #7f8c8d;
+    --text-light: #ffffff;
+    --text-muted: #95a5a6;
+    --border-color: #e1e8ed;
+    --card-bg: #ffffff;
+    --shadow: rgba(0, 0, 0, 0.08);
+    --shadow-hover: rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="dark"] {
+    --bg-primary: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    --bg-secondary: #2d3748;
+    --bg-sidebar: #2d3748;
+    --bg-footer: #2d3748;
+    --text-primary: #f7fafc;
+    --text-secondary: #cbd5e0;
+    --text-light: #f4f4f5;
+    --text-muted: #a0a0a0;
+    --border-color: #4a5568;
+    --card-bg: #2d3748;
+    --shadow: rgba(0, 0, 0, 0.3);
+    --shadow-hover: rgba(0, 0, 0, 0.4);
+}
+
+       
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            padding: 5px;
+            border: none;
+            background: none;
+        }
+
+        .hamburger-line {
+            width: 25px;
+            height: 3px;
+            background: var(--text-primary);
+            margin: 3px 0;
+            transition: 0.3s;
+            border-radius: 2px;
+        }
+
+        .hamburger.active .hamburger-line:nth-child(1) {
+            transform: rotate(-45deg) translate(-5px, 6px);
+        }
+
+        .hamburger.active .hamburger-line:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger.active .hamburger-line:nth-child(3) {
+            transform: rotate(45deg) translate(-5px, -6px);
+        }
+
+        .header-content {
+            flex: 1;
+        }
+
+        .dashboard-content {
+            padding: 40px;
+            flex: 1;
+            min-height: calc(100vh - 200px);
+        }
+        
+        /* Fixed Welcome User Styling */
+        #welcomeUser {
+            color: #764ba2;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 8px 0 0 0;
+            padding: 0;
+            text-align: left;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: inline-block;
+            position: relative;
+        }
+
+        /* Dark mode welcome user styling */
+        [data-theme="dark"] #welcomeUser {
+            background: linear-gradient(135deg, #64b5f6, #81c784);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        #welcomeUser::before {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 1px;
+            opacity: 0.6;
+        }
+
+        [data-theme="dark"] #welcomeUser::before {
+            background: linear-gradient(135deg, #64b5f6, #81c784);
+        }
+
+
+       .section-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 25px;
+    text-shadow: none;
+}
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px var(--shadow);
+            border-left: 5px solid;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px var(--shadow-hover);
+        }
+
+        .stat-card.total {
+            border-left-color: #3498db;
+        }
+
+        .stat-card.completed {
+            border-left-color: #27ae60;
+        }
+
+        .stat-card.pending {
+            border-left-color: #f39c12;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            opacity: 0.1;
+            border-radius: 50%;
+            transform: translate(30px, -30px);
+        }
+
+        .stat-card.total::before {
+            background: #3498db;
+        }
+
+        .stat-card.completed::before {
+            background: #27ae60;
+        }
+
+        .stat-card.pending::before {
+            background: #f39c12;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* Donut Chart Section */
+        .chart-section {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px var(--shadow);
+            margin-bottom: 40px;
+        }
+
+        .chart-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            min-height: 300px;
+        }
+
+        .donut-chart {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .donut-svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .donut-segment {
+            fill: none;
+            stroke-width: 40;
+            transition: all 0.3s ease;
+        }
+
+        .donut-segment:hover {
+            stroke-width: 45;
+            filter: brightness(1.1);
+        }
+
+        .donut-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .donut-total {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .donut-label {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .chart-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .legend-item:hover {
+            background: var(--bg-secondary);
+            transform: translateX(5px);
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .legend-info {
+            flex: 1;
+        }
+
+        .legend-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .legend-value {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-percentage {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-left: auto;
+        }
+
+        /* Task List Section - Adjusted spacing after removal */
+        .task-list-section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px var(--shadow);
+            overflow: hidden;
+            margin-top: 20px; /* Added top margin */
+            margin-bottom: 40px;
+        }
+
+        .filter-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .filter-tab {
+            flex: 1;
+            padding: 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .filter-tab:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .filter-tab.active {
+            color: #3498db;
+            background: var(--bg-secondary);
+        }
+
+        .filter-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #3498db;
+        }
+
+        .task-list {
+            padding: 20px 0;
+            min-height: 300px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 20px 30px;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .task-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-item.completed {
+            opacity: 0.6;
+        }
+
+        .task-checkbox {
+            width: 22px;
+            height: 22px;
+            border: 2px solid #bdc3c7;
+            border-radius: 6px;
+            margin-right: 20px;
+            cursor: pointer;
+            position: relative;
+            background: var(--card-bg);
+            transition: all 0.3s ease;
+        }
+
+        .task-checkbox:hover {
+            border-color: #3498db;
+            transform: scale(1.1);
+        }
+
+        .task-checkbox.checked {
+            background: #27ae60;
+            border-color: #27ae60;
+        }
+
+        .task-checkbox.checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .task-text {
+            flex: 1;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .task-text:hover {
+            color: #3498db;
+        }
+
+        .task-item.completed .task-text {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .task-item:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+            transform: scale(1.05);
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-text {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+        }
+
+        .empty-subtext {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .page-content {
+            display: none;
+        }
+
+        .page-content.active {
+            display: block;
+            flex: 1;
+        }
+
+        /* Updated Footer Styles - Fixed at bottom with proper spacing */
+        .footer {
+            background: var(--bg-footer);
+            color: var(--text-primary);
+            padding: 25px 40px;
+            box-shadow: 0 -2px 10px var(--shadow);
+            border-top: 1px solid var(--border-color);
+            margin-top: 50px;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .footer-bottom {
+            text-align: center;
+        }
+
+        .footer-bottom p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .footer-bottom .heart {
+            color: #e74c3c;
+            animation: heartbeat 1.5s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                z-index: 1000;
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .hamburger {
+                display: flex;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-content {
+                padding: 20px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .footer {
+                padding: 20px;
+            }
+
+            .overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+            }
+
+            .overlay.active {
+                display: block;
+            }
+
+            .chart-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .donut-chart {
+                width: 200px;
+                height: 200px;
+            }
+
+            .chart-legend {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .user-profile {
+                gap: 10px;
+            }
+
+            .user-avatar {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+
+            .profile-dropdown {
+                right: -10px;
+                min-width: 180px;
+            }
+        }
+
+        /* Chart animation */
+        @keyframes donut-animation {
+            from {
+                stroke-dashoffset: 628;
+            }
+            to {
+                stroke-dashoffset: var(--final-offset);
+            }
+        }
+
+        .donut-segment {
+            animation: donut-animation 1s ease-out forwards;
+        }
+
+        /* Notification styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 10000;
+            animation: slideIn 0.3s ease;
+            min-width: 250px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .notification.success {
+            background: #27ae60;
+        }
+
+        .notification.error {
+            background: #e74c3c;
+        }
+
+        .notification.info {
+            background: #3498db;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+       /* Add to your existing CSS */
+.profile-dropdown-item.danger {
+    color: #e74c3c !important;
+}
+
+.profile-dropdown-item.danger:hover {
+    background: rgba(231, 76, 60, 0.1) !important;
+}
+
+.profile-dropdown-item.danger i {
+    color: #e74c3c !important;
+}
+
+    </style>
+</head>
+<body>
+
+ <div class="app-container">
+        <div class="content-wrapper">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <div class="logo">
+                        <span class="logo-icon">📋</span>
+                        <span>TaskFlow</span>
+                    </div>
+                </div>
+                
+                <nav class="nav-menu">
+    <button class="nav-item active" onclick="location.href='dashboard.html'">
+        <span class="nav-icon"><i class="fas fa-home"></i></span>
+        <span>Dashboard</span>
+    </button>
+    <button class="nav-item" onclick="location.href='task.html'">
+        <span class="nav-icon"><i class="fas fa-tasks"></i></span>
+        <span>Tasks</span>
+    </button>
+    <button class="nav-item" onclick="location.href='setting.html'">
+        <span class="nav-icon"><i class="fas fa-cog"></i></span>
+        <span>Settings</span>
+    </button>
+</nav>
+
+                <div class="theme-toggle">
+                    <button class="nav-item" id="themeToggle">
+                        <span class="nav-icon"> 🌙</span>
+                        <span>Dark Mode</span>
+                    </button>
+                </div>
+                <div class="logout">
+                    <button class="nav-item" id="logout">
+                        <span class="nav-icon">🚪</span>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Overlay for mobile -->
+            <div class="overlay" id="overlay"></div>
+
+            <!-- Main Content -->
+          <main class="main-content">
+                <header class="header">
+                    <div class="header-content">
+                        <h1 class="header-title">Dashboard</h1>
+                        <p class="header-subtitle">Welcome to your productivity hub</p>
+                        <h2 id="welcomeUser"></h2>
+                    </div>
+                    
+                <!-- User Profile Section -->
+<div class="user-profile">
+    <div class="user-avatar" id="userAvatar">
+        JD
+    </div>
+    <div class="profile-dropdown" id="profileDropdown">
+        <div class="profile-dropdown-header">
+            <div class="profile-dropdown-avatar" id="dropdownAvatar">JD</div>
+            <div class="profile-dropdown-name" id="dropdownName">John Doe</div>
+            <div class="profile-dropdown-email" id="dropdownEmail">john@example.com</div>
+        </div>
+        <div class="profile-dropdown-menu">
+            <a href="setting.html" class="profile-dropdown-item">
+                <i class="fas fa-user"></i>
+                <span>My Profile</span>
+            </a>
+            <a href="setting.html" class="profile-dropdown-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+            
+            <!-- Separator -->
+            <div style="border-top: 1px solid var(--border-color); margin: 8px 0;"></div>
+            
+            <!-- Delete Account Button -->
+            <button class="profile-dropdown-item danger" id="deleteAccountBtn">
+                <i class="fas fa-trash-alt"></i>
+                <span>Delete Account</span>
+            </button>
+            
+            <!-- Logout Button -->
+            <button class="profile-dropdown-item" id="profileLogout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </div>
+</div>  
+                    
+                    <button class="hamburger" id="hamburger">
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                    </button>
+                </header>
+
+                <!-- Dashboard Page -->
+                <div class="page-content active" id="dashboard-page">
+                    <div class="dashboard-content">
+                        <h2 class="section-title">Your Tasks Overview</h2>
+                        
+                        <!-- Stats Cards -->
+                        <div class="stats-grid">
+                            <div class="stat-card total">
+                                <div class="stat-label">Total Tasks</div>
+                                <div class="stat-value" id="total-count">0</div>
+                            </div>
+                            <div class="stat-card completed">
+                                <div class="stat-label">Completed</div>
+                                <div class="stat-value" id="completed-count">0</div>
+                            </div>
+                             <div class="stat-card pending">
+                            <div class="stat-label">Pending</div>
+                            <div class="stat-value" id="pending-count">0</div>
+                        </div>
+                    </div>
+
+                    <!-- Donut Chart Section -->
+                    <div class="chart-section">
+                        <h3 class="section-title" style="font-size: 1.5rem; margin-bottom: 30px;">Task Status Distribution</h3>
+                        <div class="chart-container">
+                            <div class="donut-chart">
+                                <svg class="donut-svg" viewBox="0 0 200 200">
+                                    <!-- Background circle -->
+                                    <circle
+                                        cx="100"
+                                        cy="100"
+                                        r="80"
+                                        fill="none"
+                                        stroke="var(--border-color)"
+                                        stroke-width="40"
+                                        opacity="0.3"
+                                    />
+                                    <!-- Completed segment -->
+                                    <circle
+                                        id="completed-segment"
+                                        cx="100"
+                                        cy="100"
+                                        r="80"
+                                        class="donut-segment"
+                                        stroke="#27ae60"
+                                        stroke-dasharray="0 628"
+                                        stroke-linecap="round"
+                                    />
+                                    <!-- Pending segment -->
+                                    <circle
+                                        id="pending-segment"
+                                        cx="100"
+                                        cy="100"
+                                        r="80"
+                                        class="donut-segment"
+                                        stroke="#f39c12"
+                                        stroke-dasharray="0 628"
+                                        stroke-linecap="round"
+                                    />
+                                    <!-- In Progress segment -->
+                                    <circle
+                                        id="in-progress-segment"
+                                        cx="100"
+                                        cy="100"
+                                        r="80"
+                                        class="donut-segment"
+                                        stroke="#3498db"
+                                        stroke-dasharray="0 628"
+                                        stroke-linecap="round"
+                                    />
+                                </svg>
+                                <div class="donut-center">
+                                    <div class="donut-total" id="donut-total">0</div>
+                                    <div class="donut-label">Total Tasks</div>
+                                </div>
+                            </div>
+                            
+                            <div class="chart-legend">
+                                <div class="legend-item" data-type="completed">
+                                    <div class="legend-color" style="background: #27ae60;"></div>
+                                    <div class="legend-info">
+                                        <div class="legend-name">Completed</div>
+                                        <div class="legend-value" id="completed-legend">0 tasks</div>
+                                    </div>
+                                    <div class="legend-percentage" id="completed-percentage">0%</div>
+                                </div>
+                                
+                                <div class="legend-item" data-type="pending">
+                                    <div class="legend-color" style="background: #f39c12;"></div>
+                                    <div class="legend-info">
+                                        <div class="legend-name">Pending</div>
+                                        <div class="legend-value" id="pending-legend">0 tasks</div>
+                                    </div>
+                                    <div class="legend-percentage" id="pending-percentage">0%</div>
+                                </div>
+                                
+                                <div class="legend-item" data-type="in-progress">
+                                    <div class="legend-color" style="background: #3498db;"></div>
+                                    <div class="legend-info">
+                                        <div class="legend-name">In Progress</div>
+                                        <div class="legend-value" id="in-progress-legend">0 tasks</div>
+                                    </div>
+                                    <div class="legend-percentage" id="in-progress-percentage">0%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Task List -->
+                    <div class="task-list-section">
+                        <div class="filter-tabs">
+                            <button class="filter-tab active" data-filter="all">All Tasks</button>
+                            <button class="filter-tab" data-filter="active">Active</button>
+                            <button class="filter-tab" data-filter="completed">Completed</button>
+                        </div>
+                        
+                        <div class="task-list" id="taskList">
+                            <div class="empty-state">
+                                <div class="empty-icon">📝</div>
+                                <div class="empty-text">No tasks yet</div>
+                                <div class="empty-subtext">Add your first task to get started!</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+           <!-- Footer moved inside main-content -->
+            <footer class="footer">
+                <div class="footer-bottom">
+                     <p>&copy; 2025 TaskFlow Dashboard. All rights reserved. </p>
+                </div>
+            </footer>
+        </main>
+    </div>
+</div>
+<script>
+class TaskFlowStorage {
+  constructor() {
+    this.tasks = [];
+    this.listeners = [];
+    this.notificationSettings = { browser_notifications: true };
+    this.dueTasks = [];
+    this.notificationCheckInterval = null;
+  }
+
+  // Register UI listeners for task changes
+  addListener(callback) {
+    this.listeners.push(callback);
+  }
+
+  // Notify UI to re-render on data change
+  notifyListeners() {
+    this.listeners.forEach(callback => callback(this.tasks));
+  }
+
+  // Get token with fallback for both storage keys
+  getAuthToken() {
+    return localStorage.getItem('token') || localStorage.getItem('taskflow_token');
+  }
+
+  // Fetch all tasks from backend
+  async fetchTasks() {
+    const token = this.getAuthToken();
+    if (!token) {
+      window.location.href = 'index.html';
+      return;
+    }
+    try {
+      const response = await fetch('/api/tasks', {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      });
+      if (response.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('taskflow_token');
+        window.location.href = 'index.html';
+        return;
+      }
+      if (!response.ok) throw new Error('Failed to fetch tasks');
+      this.tasks = await response.json();
+      this.notifyListeners();
+      
+      // Check for due tasks after fetching
+      await this.checkDueTasks();
+      return this.tasks;
+    } catch (error) {
+      console.error('Fetching tasks error:', error);
+      return [];
+    }
+  }
+
+  // Fetch tasks due soon for notifications
+  async fetchDueTasks() {
+    const token = this.getAuthToken();
+    if (!token) return [];
+    
+    try {
+      const response = await fetch('/api/tasks/due-soon', {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch due tasks');
+      this.dueTasks = await response.json();
+      return this.dueTasks;
+    } catch (error) {
+      console.error('Fetching due tasks error:', error);
+      return [];
+    }
+  }
+
+  // Fetch user notification settings
+  async fetchUserSettings() {
+    const token = this.getAuthToken();
+    if (!token) return;
+    
+    try {
+      const response = await fetch('/api/me', {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      });
+      if (response.ok) {
+        const user = await response.json();
+        this.notificationSettings = { 
+          browser_notifications: user.browser_notifications !== false 
+        };
+      }
+    } catch (error) {
+      console.error('Failed to fetch user settings:', error);
+    }
+  }
+
+  // Check for due tasks and show notifications
+  async checkDueTasks() {
+    if (!this.notificationSettings.browser_notifications) return;
+    if (!('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+
+    try {
+      const dueTasks = await this.fetchDueTasks();
+      
+      dueTasks.forEach(task => {
+        const notificationKey = `task_${task.id}_${task.dueDate}`;
+        
+        // Check if we've already shown this notification today
+        const shownToday = localStorage.getItem(notificationKey);
+        const today = new Date().toISOString().split('T')[0];
+        
+        if (shownToday === today) return;
+        
+        let message = '';
+        if (task.daysUntilDue <= 0) {
+          message = `📅 Task "${task.title}" is due today!`;
+        } else if (task.daysUntilDue === 1) {
+          message = `⏰ Task "${task.title}" is due tomorrow!`;
+        }
+        
+        if (message) {
+          this.showBrowserNotification(task.title, message, task.id);
+          localStorage.setItem(notificationKey, today);
+        }
+      });
+    } catch (error) {
+      console.error('Error checking due tasks:', error);
+    }
+  }
+
+  // Show browser notification
+  showBrowserNotification(title, message, taskId) {
+    if (!('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+    if (!this.notificationSettings.browser_notifications) return;
+
+    try {
+      const notification = new Notification('TaskFlow Reminder', {
+        body: message,
+        icon: '/favicon.ico',
+        tag: `task-${taskId}`,
+        requireInteraction: false,
+        badge: '/favicon.ico'
+      });
+
+      notification.onclick = () => {
+        window.focus();
+        notification.close();
+        
+        // Scroll to task if visible
+        const taskElement = document.querySelector(`[data-id="${taskId}"]`);
+        if (taskElement) {
+          taskElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          taskElement.style.animation = 'highlight 2s ease-in-out';
+        }
+      };
+
+      // Auto close after 10 seconds
+      setTimeout(() => {
+        notification.close();
+      }, 10000);
+
+      console.log('Browser notification shown:', message);
+    } catch (error) {
+      console.error('Error showing notification:', error);
+    }
+  }
+
+  // Start periodic notification checks
+  startNotificationChecks() {
+    // Check immediately
+    this.checkDueTasks();
+    
+    // Check every 30 minutes
+    this.notificationCheckInterval = setInterval(() => {
+      this.checkDueTasks();
+    }, 30 * 60 * 1000);
+    
+    console.log('Started periodic notification checks');
+  }
+
+  // Stop periodic notification checks
+  stopNotificationChecks() {
+    if (this.notificationCheckInterval) {
+      clearInterval(this.notificationCheckInterval);
+      this.notificationCheckInterval = null;
+      console.log('Stopped periodic notification checks');
+    }
+  }
+
+  // Add new task through backend
+  async addTask(taskData) {
+    const token = this.getAuthToken();
+    if (!token) {
+      window.location.href = 'index.html';
+      return null;
+    }
+    try {
+      const response = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(taskData)
+      });
+      if (response.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('taskflow_token');
+        window.location.href = 'index.html';
+        return null;
+      }
+      if (!response.ok) throw new Error('Failed to add task');
+      const newTask = await response.json();
+      this.tasks.push(newTask);
+      this.notifyListeners();
+      this.broadcastUpdate();
+      
+      // Check if the new task is due soon
+      await this.checkDueTasks();
+      
+      return newTask;
+    } catch (error) {
+      console.error('Adding task error:', error);
+      return null;
+    }
+  }
+
+  // Update task (e.g., toggle completion)
+  async updateTask(taskId, updates) {
+    const token = this.getAuthToken();
+    if (!token) {
+      window.location.href = 'index.html';
+      return null;
+    }
+    try {
+      const response = await fetch(`/api/tasks/${taskId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updates)
+      });
+      if (response.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('taskflow_token');
+        window.location.href = 'index.html';
+        return null;
+      }
+      if (!response.ok) throw new Error('Failed to update task');
+      const updatedTask = await response.json();
+      this.tasks = this.tasks.map(t => t.id === updatedTask.id ? updatedTask : t);
+      this.notifyListeners();
+      this.broadcastUpdate();
+      
+      // Show completion notification if task was completed
+      if (updates.completed && !this.tasks.find(t => t.id === taskId)?.completed) {
+        this.showBrowserNotification(
+          'Task Completed!',
+          `✅ Great job! You completed "${updatedTask.title}"`,
+          taskId
+        );
+      }
+      
+      return updatedTask;
+    } catch (error) {
+      console.error('Updating task error:', error);
+      return null;
+    }
+  }
+
+  // Delete task
+  async deleteTask(taskId) {
+    const token = this.getAuthToken();
+    if (!token) {
+      window.location.href = 'index.html';
+      return false;
+    }
+    try {
+      const response = await fetch(`/api/tasks/${taskId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': 'Bearer ' + token,
+        }
+      });
+      if (response.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('taskflow_token');
+        window.location.href = 'index.html';
+        return false;
+      }
+      if (!response.ok) throw new Error('Failed to delete task');
+      this.tasks = this.tasks.filter(t => t.id !== taskId);
+      this.notifyListeners();
+      this.broadcastUpdate();
+      
+      // Clear any stored notification flags for this task
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith(`task_${taskId}_`)) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+      
+      return true;
+    } catch (error) {
+      console.error('Deleting task error:', error);
+      return false;
+    }
+  }
+
+  // Toggle completion state of a task
+  async toggleTaskCompletion(taskId) {
+    const task = this.tasks.find(t => t.id === taskId);
+    if (!task) return null;
+    return await this.updateTask(taskId, {
+      completed: !task.completed,
+      status: !task.completed ? 'completed' : 'pending'
+    });
+  }
+
+  // Get tasks filtered by status
+  getFilteredTasks(filter) {
+    if (filter === 'active') return this.tasks.filter(t => !t.completed);
+    if (filter === 'completed') return this.tasks.filter(t => t.completed);
+    return this.tasks; // all
+  }
+
+  // Get statistics for dashboard
+  getStats() {
+    const total = this.tasks.length;
+    const completed = this.tasks.filter(t => t.completed).length;
+    const pending = total - completed;
+    const inProgress = 0; // For now, we don't have in-progress status
+    return { total, completed, pending, inProgress };
+  }
+
+  // Broadcast updates by writing a timestamp for cross-tab sync
+  broadcastUpdate() {
+    localStorage.setItem('taskFlowUpdate', Date.now().toString());
+    console.log('Tasks updated:', this.tasks.length);
+  }
+}
+
+// Instantiate storage and wire up UI logic
+const storage = new TaskFlowStorage();
+
+// UI Elements
+const taskList = document.getElementById('taskList');
+const filterTabs = document.querySelectorAll('.filter-tab');
+const totalCountEl = document.getElementById('total-count');
+const completedCountEl = document.getElementById('completed-count');
+const pendingCountEl = document.getElementById('pending-count');
+const completedSegment = document.getElementById('completed-segment');
+const pendingSegment = document.getElementById('pending-segment');
+const inProgressSegment = document.getElementById('in-progress-segment');
+const donutTotal = document.getElementById('donut-total');
+
+// Profile elements
+const userAvatar = document.getElementById('userAvatar');
+const profileDropdown = document.getElementById('profileDropdown');
+const dropdownAvatar = document.getElementById('dropdownAvatar');
+const dropdownName = document.getElementById('dropdownName');
+const dropdownEmail = document.getElementById('dropdownEmail');
+const profileLogout = document.getElementById('profileLogout');
+const welcomeUser = document.getElementById('welcomeUser');
+
+// Notification elements
+const notificationBanner = document.getElementById('notificationBanner');
+const enableNotificationsBtn = document.getElementById('enableNotifications');
+const dismissNotificationsBtn = document.getElementById('dismissNotifications');
+
+let currentFilter = 'all';
+
+// Initialize browser notifications
+async function initializeBrowserNotifications() {
+  if (!('Notification' in window)) {
+    console.log('Browser notifications not supported');
+    return;
+  }
+
+  const permission = Notification.permission;
+  console.log('Notification permission:', permission);
+
+  // Show notification banner if permission not granted and user has notifications enabled
+  if (permission === 'default' && storage.notificationSettings.browser_notifications) {
+    showNotificationBanner();
+  }
+
+  // If permission is granted, start notification checks
+  if (permission === 'granted') {
+    storage.startNotificationChecks();
+  }
+}
+
+// Show notification permission banner
+function showNotificationBanner() {
+  if (notificationBanner) {
+    notificationBanner.style.display = 'flex';
+  }
+}
+
+// Hide notification permission banner
+function hideNotificationBanner() {
+  if (notificationBanner) {
+    notificationBanner.style.display = 'none';
+  }
+}
+
+// Request notification permission
+async function requestNotificationPermission() {
+  if (!('Notification' in window)) {
+    showNotification('Browser notifications are not supported', 'error');
+    return false;
+  }
+
+  try {
+    const permission = await Notification.requestPermission();
+    
+    if (permission === 'granted') {
+      showNotification('Browser notifications enabled!', 'success');
+      hideNotificationBanner();
+      storage.startNotificationChecks();
+      return true;
+    } else {
+      showNotification('Browser notifications denied', 'error');
+      return false;
+    }
+  } catch (error) {
+    console.error('Error requesting notification permission:', error);
+    showNotification('Failed to request notification permission', 'error');
+    return false;
+  }
+}
+
+// Handle enable notifications button
+if (enableNotificationsBtn) {
+  enableNotificationsBtn.addEventListener('click', requestNotificationPermission);
+}
+
+// Handle dismiss notifications button
+if (dismissNotificationsBtn) {
+  dismissNotificationsBtn.addEventListener('click', () => {
+    hideNotificationBanner();
+    // Store dismissal preference
+    localStorage.setItem('notificationBannerDismissed', 'true');
+  });
+}
+
+// Load user profile info with server data
+async function loadUserProfile() {
+  const token = storage.getAuthToken();
+  
+  try {
+    // Try to get fresh user data from server
+    const response = await fetch('/api/me', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    let username = 'User';
+    let email = 'user@example.com';
+    
+    if (response.ok) {
+      const userData = await response.json();
+      username = userData.username || 'User';
+      email = userData.email || 'user@example.com';
+      
+      // Store in localStorage for offline access
+      localStorage.setItem('username', username);
+      localStorage.setItem('email', email);
+      
+      // Update notification settings
+      storage.notificationSettings.browser_notifications = userData.browser_notifications !== false;
+    } else {
+      // Fallback to localStorage data
+      username = localStorage.getItem('username') || 'User';
+      email = localStorage.getItem('email') || 'user@example.com';
+    }
+    
+    // Generate capitalized initials - handle undefined/empty cases
+    let initials = 'US';
+    if (username && username.trim().length > 0) {
+      initials = username
+        .trim()
+        .split(' ')
+        .filter(name => name.length > 0)
+        .map(name => name.charAt(0).toUpperCase())
+        .join('')
+        .substring(0, 2);
+    }
+    
+    // Ensure we always have 2 characters
+    if (initials.length === 1) initials = initials + initials;
+    if (initials.length === 0) initials = 'US';
+    
+    // Update UI elements with actual user data
+    if (userAvatar) userAvatar.textContent = initials;
+    if (dropdownAvatar) dropdownAvatar.textContent = initials;
+    if (dropdownName) dropdownName.textContent = username;
+    if (dropdownEmail) dropdownEmail.textContent = email;
+    if (welcomeUser) welcomeUser.textContent = `Welcome back, ${username}!`;
+    
+  } catch (error) {
+    console.error('Error loading user profile:', error);
+    // Use fallback data
+    const username = localStorage.getItem('username') || 'User';
+    const email = localStorage.getItem('email') || 'user@example.com';
+    
+    if (welcomeUser) welcomeUser.textContent = `Welcome back, ${username}!`;
+  }
+}
+
+// Profile dropdown toggle
+if (userAvatar) {
+  userAvatar.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (profileDropdown) {
+      profileDropdown.classList.toggle('show');
+    }
+  });
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', (e) => {
+  if (userAvatar && profileDropdown && 
+      !userAvatar.contains(e.target) && !profileDropdown.contains(e.target)) {
+    profileDropdown.classList.remove('show');
+  }
+});
+
+// Profile logout
+if (profileLogout) {
+  profileLogout.addEventListener('click', () => {
+    if (confirm('Are you sure you want to logout?')) {
+      // Stop notification checks
+      storage.stopNotificationChecks();
+      
+      // Clear storage
+      localStorage.removeItem('token');
+      localStorage.removeItem('taskflow_token');
+      localStorage.removeItem('username');
+      localStorage.removeItem('email');
+      
+      window.location.href = 'index.html';
+    }
+  });
+}
+
+// Load tasks initially and on broadcast
+async function loadTasksAndRender() {
+  await storage.fetchUserSettings();
+  await storage.fetchTasks();
+  renderTasks();
+  updateStats();
+  updateChart();
+}
+
+// Render tasks on dashboard list
+function renderTasks() {
+  const filteredTasks = storage.getFilteredTasks(currentFilter);
+  if (filteredTasks.length === 0) {
+    if (taskList) {
+      taskList.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📝</div>
+          <div class="empty-text">No ${currentFilter === 'all' ? '' : currentFilter} tasks found</div>
+          <div class="empty-subtext">${currentFilter === 'all' ? 'Add your first task to get started!' : 'Try a different filter or add new tasks.'}</div>
+        </div>
+      `;
+    }
+    return;
+  }
+
+  if (taskList) {
+    taskList.innerHTML = filteredTasks.map(t => {
+      const dueDate = t.dueDate ? new Date(t.dueDate) : null;
+      const today = new Date();
+      const isOverdue = dueDate && dueDate < today && !t.completed;
+      const isDueToday = dueDate && dueDate.toDateString() === today.toDateString() && !t.completed;
+      
+      let dueBadge = '';
+      if (isOverdue) {
+        dueBadge = '<span class="due-badge overdue">Overdue</span>';
+      } else if (isDueToday) {
+        dueBadge = '<span class="due-badge due-today">Due Today</span>';
+      } else if (dueDate && !t.completed) {
+        const daysUntil = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+        if (daysUntil === 1) {
+          dueBadge = '<span class="due-badge due-tomorrow">Due Tomorrow</span>';
+        } else if (daysUntil <= 7) {
+          dueBadge = `<span class="due-badge due-soon">Due in ${daysUntil} days</span>`;
+        }
+      }
+      
+      return `
+        <div class="task-item ${t.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''} ${isDueToday ? 'due-today' : ''}">
+          <div class="task-checkbox ${t.completed ? 'checked' : ''}" data-id="${t.id}"></div>
+          <div class="task-content">
+            <span class="task-text" data-id="${t.id}">${t.title}</span>
+            ${t.description ? `<div class="task-description">${t.description}</div>` : ''}
+            ${dueBadge}
+          </div>
+          <button class="delete-btn" data-id="${t.id}" title="Delete task">×</button>
+        </div>
+      `;
+    }).join('');
+
+    // Add event listeners for new elements
+    document.querySelectorAll('.task-checkbox').forEach(el => {
+      el.onclick = async () => {
+        const id = parseInt(el.dataset.id);
+        await storage.toggleTaskCompletion(id);
+        renderTasks();
+        updateStats();
+        updateChart();
+      };
+    });
+
+    document.querySelectorAll('.task-text').forEach(el => {
+      el.onclick = async () => {
+        const id = parseInt(el.dataset.id);
+        await storage.toggleTaskCompletion(id);
+        renderTasks();
+        updateStats();
+        updateChart();
+      };
+    });
+
+    document.querySelectorAll('.delete-btn').forEach(el => {
+      el.onclick = async () => {
+        const id = parseInt(el.dataset.id);
+        const task = storage.tasks.find(t => t.id === id);
+        const taskTitle = task ? task.title : 'this task';
+        
+        if (confirm(`Are you sure you want to delete "${taskTitle}"?`)) {
+          const success = await storage.deleteTask(id);
+          if (success) {
+            showNotification('Task deleted successfully!', 'success');
+            renderTasks();
+            updateStats();
+            updateChart();
+          } else {
+            showNotification('Failed to delete task.', 'error');
+          }
+        }
+      };
+    });
+  }
+}
+
+// Update dashboard stats values
+function updateStats() {
+  const { total, completed, pending } = storage.getStats();
+  if (totalCountEl) totalCountEl.textContent = total;
+  if (completedCountEl) completedCountEl.textContent = completed;
+  if (pendingCountEl) pendingCountEl.textContent = pending;
+  if (donutTotal) donutTotal.textContent = total;
+  
+  // Update legend text
+  const completedLegend = document.getElementById('completed-legend');
+  const pendingLegend = document.getElementById('pending-legend');
+  const inProgressLegend = document.getElementById('in-progress-legend');
+  
+  if (completedLegend) completedLegend.textContent = `${completed} task${completed !== 1 ? 's' : ''}`;
+  if (pendingLegend) pendingLegend.textContent = `${pending} task${pending !== 1 ? 's' : ''}`;
+  if (inProgressLegend) inProgressLegend.textContent = '0 tasks';
+}
+
+// Update donut chart visualization with improved logic
+function updateChart() {
+  const { total, completed, pending, inProgress } = storage.getStats();
+  const radius = 80;
+  const circumference = 2 * Math.PI * radius;
+
+  // Calculate percentages
+  const completedPercent = total > 0 ? (completed / total) : 0;
+  const pendingPercent = total > 0 ? (pending / total) : 0;
+  const inProgressPercent = total > 0 ? (inProgress / total) : 0;
+
+  // Update percentage displays
+  const completedPercentageEl = document.getElementById('completed-percentage');
+  const pendingPercentageEl = document.getElementById('pending-percentage');
+  const inProgressPercentageEl = document.getElementById('in-progress-percentage');
+  
+  if (completedPercentageEl) completedPercentageEl.textContent = `${Math.round(completedPercent * 100)}%`;
+  if (pendingPercentageEl) pendingPercentageEl.textContent = `${Math.round(pendingPercent * 100)}%`;
+  if (inProgressPercentageEl) inProgressPercentageEl.textContent = `${Math.round(inProgressPercent * 100)}%`;
+
+  // Calculate stroke lengths
+  const completedStroke = completedPercent * circumference;
+  const pendingStroke = pendingPercent * circumference;
+  const inProgressStroke = inProgressPercent * circumference;
+
+  // Update segments with proper positioning
+  if (completedSegment) {
+    completedSegment.style.strokeDasharray = `${completedStroke} ${circumference}`;
+    completedSegment.style.strokeDashoffset = '0';
+    completedSegment.style.transform = 'rotate(0deg)';
+    completedSegment.style.transformOrigin = '100px 100px';
+  }
+
+  if (pendingSegment) {
+    pendingSegment.style.strokeDasharray = `${pendingStroke} ${circumference}`;
+    pendingSegment.style.strokeDashoffset = '0';
+    pendingSegment.style.transform = `rotate(${completedPercent * 360}deg)`;
+    pendingSegment.style.transformOrigin = '100px 100px';
+  }
+
+  if (inProgressSegment) {
+    inProgressSegment.style.strokeDasharray = `${inProgressStroke} ${circumference}`;
+    inProgressSegment.style.strokeDashoffset = '0';
+    inProgressSegment.style.transform = `rotate(${(completedPercent + pendingPercent) * 360}deg)`;
+    inProgressSegment.style.transformOrigin = '100px 100px';
+  }
+
+  // Add animation class for smooth transitions
+  [completedSegment, pendingSegment, inProgressSegment].forEach(segment => {
+    if (segment) {
+      segment.style.transition = 'all 0.5s ease-in-out';
+    }
+  });
+}
+
+// Show notification messages
+function showNotification(message, type = 'info') {
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.textContent = message;
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.style.animation = 'slideOut 0.3s ease forwards';
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.parentNode.removeChild(notification);
+      }
+    }, 300);
+  }, 3000);
+}
+
+// Filter tab clicks
+filterTabs.forEach(tab => {
+  tab.addEventListener('click', (e) => {
+    filterTabs.forEach(t => t.classList.remove('active'));
+    e.target.classList.add('active');
+    currentFilter = e.target.dataset.filter;
+    renderTasks();
+  });
+});
+
+// Cross-tab synchronization on task changes
+window.addEventListener('storage', async (e) => {
+  if (e.key === 'taskFlowUpdate') {
+    await loadTasksAndRender();
+  }
+});
+
+// Broadcast task changes for cross-tab sync on page unload
+window.addEventListener('beforeunload', () => {
+  storage.broadcastUpdate();
+});
+
+// Page visibility change handler - check for due tasks when page becomes visible
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && storage.notificationSettings.browser_notifications) {
+    storage.checkDueTasks();
+  }
+});
+
+// Hamburger Menu Toggle
+const hamburger = document.getElementById('hamburger');
+const sidebar = document.querySelector('.sidebar');
+const overlay = document.getElementById('overlay');
+const themeToggle = document.getElementById('themeToggle');
+
+if (hamburger && sidebar && overlay) {
+  hamburger.addEventListener('click', function() {
+    sidebar.classList.toggle('mobile-open');
+    hamburger.classList.toggle('active');
+    overlay.classList.toggle('active');
+  });
+
+  overlay.addEventListener('click', function() {
+    sidebar.classList.remove('mobile-open');
+    hamburger.classList.remove('active');
+    overlay.classList.remove('active');
+  });
+}
+
+// Theme toggle
+if (themeToggle) {
+  themeToggle.addEventListener('click', function() {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    
+    const isDark = newTheme === 'dark';
+    themeToggle.innerHTML = `
+        <span class="nav-icon">${isDark ? '☀️' : '🌙'}</span>
+        <span>${isDark ? 'Light Mode' : 'Dark Mode'}</span>
+    `;
+  });
+}
+
+// Initialize theme
+function initializeTheme() {
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  
+  if (themeToggle) {
+    const isDark = savedTheme === 'dark';
+    themeToggle.innerHTML = `
+        <span class="nav-icon">${isDark ? '☀️' : '🌙'}</span>
+        <span>${isDark ? 'Light Mode' : 'Dark Mode'}</span>
+    `;
+  }
+}
+
+// Logout functionality
+const logoutBtn = document.getElementById("logout");
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", function () {
+    if (confirm("Are you sure you want to logout?")) {
+      // Stop notification checks
+      storage.stopNotificationChecks();
+      
+      localStorage.removeItem('token');
+      localStorage.removeItem('taskflow_token');
+      localStorage.removeItem('username');
+      localStorage.removeItem('email');
+      window.location.href = "index.html";
+    }
+  });
+}
+
+// Delete account functionality
+const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+if (deleteAccountBtn) {
+  deleteAccountBtn.addEventListener('click', async () => {
+    const confirmation = confirm(
+      '⚠️ PERMANENT ACCOUNT DELETION ⚠️\n\n' +
+      'Are you sure you want to delete your account? This will:\n' +
+      '- Permanently delete your profile\n' +
+      '- Delete all your tasks and data\n' +
+      '- Cannot be undone!\n\n' +
+      'Click OK to continue...'
+    );
+    
+    if (!confirmation) return;
+    
+    const userInput = prompt('Please type "DELETE" to confirm account deletion:');
+    if (userInput !== 'DELETE') {
+      showNotification('Account deletion canceled', 'info');
+      return;
+    }
+    
+    const token = storage.getAuthToken();
+    if (!token) {
+      window.location.href = 'index.html';
+      return;
+    }
+    
+    try {
+      const response = await fetch('/api/me/delete-account', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      });
+      
+      if (response.ok) {
+        // Stop notification checks
+        storage.stopNotificationChecks();
+        
+        // Clear all local storage
+        localStorage.clear();
+        
+        // Show success message
+        showNotification('Account deleted successfully. Redirecting...', 'success');
+        
+        // Redirect to login page after delay
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 3000);
+      } else {
+        const errorData = await response.json();
+        showNotification('Failed to delete account: ' + (errorData.message || response.status), 'error');
+      }
+    } catch (error) {
+      console.error('Delete account error:', error);
+      showNotification('Failed to delete account: ' + error.message, 'error');
+    }
+  });
+}
+
+// Online/Offline status handling
+window.addEventListener('online', () => {
+  showNotification('Connection restored', 'success');
+  // Refresh tasks when coming back online
+  loadTasksAndRender();
+});
+
+window.addEventListener('offline', () => {
+  showNotification('You are offline. Some features may not work.', 'warning');
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  // Ctrl/Cmd + R to refresh tasks
+  if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+    e.preventDefault();
+    loadTasksAndRender();
+    showNotification('Tasks refreshed', 'info');
+  }
+  
+  // Escape to close mobile menu
+  if (e.key === 'Escape' && sidebar && overlay) {
+    sidebar.classList.remove('mobile-open');
+    hamburger.classList.remove('active');
+    overlay.classList.remove('active');
+  }
+});
+
+// Add CSS for highlight animation
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes highlight {
+    0% { background-color: var(--primary-color, #007bff); opacity: 0.1; }
+    50% { background-color: var(--primary-color, #007bff); opacity: 0.3; }
+    100% { background-color: transparent; opacity: 1; }
+  }
+  
+  .due-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-left: 8px;
+  }
+  
+  .due-badge.overdue {
+    background-color: #ff4757;
+    color: white;
+  }
+  
+  .due-badge.due-today {
+    background-color: #ffa502;
+    color: white;
+  }
+  
+  .due-badge.due-tomorrow {
+    background-color: #ff6b35;
+    color: white;
+  }
+  
+  .due-badge.due-soon {
+    background-color: #3742fa;
+    color: white;
+  }
+  
+  .task-item.overdue {
+    border-left: 4px solid #ff4757;
+  }
+  
+  .task-item.due-today {
+    border-left: 4px solid #ffa502;
+  }
+  
+  .task-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .task-description {
+    font-size: 0.875rem;
+    color: var(--text-secondary, #666);
+    opacity: 0.8;
+  }
+  
+  .notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 24px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    z-index: 10000;
+    animation: slideIn 0.3s ease forwards;
+    max-width: 400px;
+    word-wrap: break-word;
+  }
+  
+  .notification.success {
+    background-color: #2ed573;
+  }
+  
+  .notification.error {
+    background-color: #ff4757;
+  }
+  
+  .notification.warning {
+    background-color: #ffa502;
+  }
+  
+  .notification.info {
+    background-color: #3742fa;
+  }
+  
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  
+  @keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+  }
+  
+  #notificationBanner {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 12px 20px;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  
+  #notificationBanner .banner-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+  }
+  
+  #notificationBanner .banner-text {
+    flex: 1;
+    font-size: 0.9rem;
+  }
+  
+  #notificationBanner .banner-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  
+  #notificationBanner button {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  #notificationBanner button:hover {
+    background: rgba(255,255,255,0.3);
+    border-color: rgba(255,255,255,0.5);
+  }
+  
+  @media (max-width: 768px) {
+    #notificationBanner {
+      padding: 10px 15px;
+    }
+    
+    #notificationBanner .banner-content {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    #notificationBanner .banner-actions {
+      justify-content: center;
+    }
+    
+    .notification {
+      top: 10px;
+      right: 10px;
+      left: 10px;
+      max-width: none;
+    }
+  }
+`;
+document.head.appendChild(style);
+
+// On page load
+document.addEventListener('DOMContentLoaded', async () => {
+  const token = storage.getAuthToken();
+  if (!token) {
+    window.location.href = 'index.html';
+    return;
+  }
+  
+  console.log('TaskFlow Dashboard initialized');
+  
+  // Initialize theme
+  initializeTheme();
+  
+  // Load user profile and settings
+  await loadUserProfile();
+  
+  // Initialize browser notifications
+  await initializeBrowserNotifications();
+  
+  // Check if notification banner was dismissed
+  const bannerDismissed = localStorage.getItem('notificationBannerDismissed');
+  if (bannerDismissed === 'true' && Notification.permission === 'default') {
+    // Don't show banner if user dismissed it
+    hideNotificationBanner();
+  }
+  
+  // Load tasks and render
+  await loadTasksAndRender();
+  
+  console.log('Dashboard loaded successfully');
+  showNotification('Dashboard loaded successfully', 'success');
+});
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+  storage.stopNotificationChecks();
+  storage.broadcastUpdate();
+});
+
+// Handle app focus/blur for better notification management
+window.addEventListener('focus', () => {
+  // When app gets focus, check for due tasks
+  if (storage.notificationSettings.browser_notifications) {
+    setTimeout(() => storage.checkDueTasks(), 1000);
+  }
+});
+
+window.addEventListener('blur', () => {
+  // App lost focus - good time for background checks to continue
+  console.log('App lost focus, continuing background checks');
+});
+
+// Service Worker registration (if available)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(registration => {
+        console.log('Service Worker registered successfully:', registration);
+      })
+      .catch(error => {
+        console.log('Service Worker registration failed:', error);
+      });
+  });
+}
+
+// Add notification banner HTML if it doesn't exist
+if (!document.getElementById('notificationBanner')) {
+  const banner = document.createElement('div');
+  banner.id = 'notificationBanner';
+  banner.innerHTML = `
+    <div class="banner-content">
+      <span>🔔</span>
+      <div class="banner-text">
+        <strong>Enable Notifications</strong><br>
+        Get reminders for tasks due today and tomorrow
+      </div>
+    </div>
+    <div class="banner-actions">
+      <button id="enableNotifications">Enable</button>
+      <button id="dismissNotifications">Maybe Later</button>
+    </div>
+  `;
+  document.body.insertBefore(banner, document.body.firstChild);
+  
+  // Re-assign button references
+  const enableBtn = document.getElementById('enableNotifications');
+  const dismissBtn = document.getElementById('dismissNotifications');
+  
+  if (enableBtn) {
+    enableBtn.addEventListener('click', requestNotificationPermission);
+  }
+  
+  if (dismissBtn) {
+    dismissBtn.addEventListener('click', () => {
+      hideNotificationBanner();
+      localStorage.setItem('notificationBannerDismissed', 'true');
+    });
+  }
+}
+
+console.log('TaskFlow Dashboard script loaded');
+</script>
+</body>
+</html>
